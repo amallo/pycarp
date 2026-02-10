@@ -1,0 +1,28 @@
+# Environnement virtuel
+venv/
+.venv/
+env/
+
+# Fichiers MicroPython
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Fichiers de firmware
+*.bin
+
+# Fichiers de configuration locaux
+config.py
+secrets.py
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db

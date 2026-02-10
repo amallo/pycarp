@@ -1,0 +1,89 @@
+## Project Overview
+
+- **Project name**: Pycarpe IoT Messaging Module
+- **High-level goal**: Build an IoT module running on ESP32 (MicroPython) that relays messages coming from a mobile application to public or private contacts.
+- **Primary responsibilities**:
+  - Receive structured messages from a backend or gateway that is driven by a mobile app.
+  - Route and relay messages to the appropriate public or private recipients (devices, topics, or contact groups).
+  - Expose clear, stable interfaces for upstream systems (mobile/backend) and downstream transports (MQTT, HTTP, BLE, etc.).
+  - Remain robust and observable in constrained IoT environments (limited memory, intermittent connectivity).
+
+## Product Objectives
+
+- **Reliability first**: Message delivery and routing must be predictable and resilient to partial failures (network drops, device restarts).
+- **Security & privacy**:
+  - Protect private contacts and messages (encryption where applicable, minimal data at rest).
+  - Enforce clear separation between public and private contact domains.
+- **Extensibility**:
+  - It should be easy to add new message types, transports, or integrations without rewriting core logic.
+  - Configuration and deployment should support multiple environments (dev, staging, production) with minimal code changes.
+- **Performance on constrained devices**:
+  - Efficient memory usage and CPU use, leveraging MicroPython optimizations and native modules when needed.
+  - Avoid unnecessary allocations and blocking operations in the hot path.
+
+## Development Principles
+
+We follow **SOLID principles** and **Clean Architecture** to keep the codebase maintainable, testable, and extensible.
+
+### SOLID Principles
+
+- **Single Responsibility Principle (SRP)**:
+  - Each module, class, or function has one clear responsibility (e.g., message parsing, routing, transport, persistence).
+  - Avoid "god objects" that know too much or do too many things.
+
+- **Open/Closed Principle (OCP)**:
+  - Core abstractions (e.g., `MessageRouter`, `Transport`, `ContactRepository`) should be open to extension but closed to modification.
+  - New transports, storage mechanisms, or message types are added by implementing interfaces, not by modifying existing logic everywhere.
+
+- **Liskov Substitution Principle (LSP)**:
+  - Any implementation of an interface (e.g., a new transport) should be safely substitutable without surprising behavior.
+  - Avoid violating expectations such as silently ignoring messages or changing error semantics.
+
+- **Interface Segregation Principle (ISP)**:
+  - Prefer several small, focused interfaces over one large, generic one.
+  - Consumers should not depend on methods they do not use (e.g., separate read/write interfaces where appropriate).
+
+- **Dependency Inversion Principle (DIP)**:
+  - High-level policies (routing, security rules, business rules) must not depend on low-level details (Wi-Fi stack, storage implementation).
+  - Depend on abstractions (interfaces / ports), not concrete implementations (adapters).
+
+### Clean Architecture Guidelines
+
+- **Core hexagon and layers**:
+  - The **core layer** contains the whole hexagon (domain + use cases) and must not depend on infrastructure or interface details.
+  - Inside `core/xxxx`, each `xxxx` directory represents a feature-oriented module.
+  - `core/xxxx/gateways` contains all input/output ports of the hexagon (interfaces for driving and driven adapters).
+  - `core/xxxx/usecases` contains all use cases / application services for that feature.
+  - Outer layers (infrastructure, interfaces) implement the gateways and depend on the core, never the opposite.
+
+- **Dependency direction**:
+  - Inner layers (domain, application) must not depend on outer layers (infrastructure, interfaces).
+  - Use **ports and adapters**: define interfaces in the inner layers; implement them in outer layers.
+
+- **Testability**:
+  - Domain and application logic should be testable without hardware (e.g., using pure Python and mocks).
+  - Keep hardware-specific code confined to adapters with minimal logic.
+
+- **Configuration over hard-coding**:
+  - Public vs. private contact routing rules, endpoints, and credentials should be configurable (environment variables, config files, or build-time flags) instead of hard-coded.
+
+## Coding Guidelines
+
+- **Code style**:
+  - Follow standard Python style (PEP 8) as much as MicroPython allows.
+  - Prefer clear naming over cleverness; names should reflect intent (e.g., `relay_private_message`, `PublicContact`, `PrivateContact`).
+
+- **Error handling**:
+  - Fail fast on programming errors, fail gracefully on runtime issues (network, I/O).
+  - Surface meaningful errors from adapters to the application layer; avoid swallowing exceptions silently.
+
+- **Performance considerations**:
+  - For hot paths (tight loops, parsing, cryptography), consider:
+    - MicroPython decorators (`@micropython.viper`, `@micropython.native`).
+    - Native C modules when justified by benchmarks.
+  - Avoid unnecessary logging or allocations in time-critical sections.
+
+- **Documentation**:
+  - Document public interfaces and key architectural decisions in English.
+  - When adding new modules, briefly describe their responsibility and their place in the architecture.
+

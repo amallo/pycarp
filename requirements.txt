@@ -1,0 +1,4 @@
+# Outils pour flasher et communiquer avec l'ESP32 (MicroPython)
+esptool>=4.0
+adafruit-ampy>=1.1.0
+mpremote>=1.0.0
