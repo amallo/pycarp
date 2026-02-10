@@ -3,10 +3,9 @@
 - **Project name**: Pycarpe IoT Messaging Module
 - **High-level goal**: Build an IoT module running on ESP32 (MicroPython) that relays messages coming from a mobile application to public or private contacts.
 - **Primary responsibilities**:
-  - Receive structured messages from a backend or gateway that is driven by a mobile app.
-  - Route and relay messages to the appropriate public or private recipients (devices, topics, or contact groups).
-  - Expose clear, stable interfaces for upstream systems (mobile/backend) and downstream transports (MQTT, HTTP, BLE, etc.).
-  - Remain robust and observable in constrained IoT environments (limited memory, intermittent connectivity).
+  - **Receive**: Get messages from the mobile app (via a backend or gateway) in a well-defined format.
+  - **Route**: Send each message to the right recipients—public (e.g. broadcast topics) or private (e.g. specific contacts or devices).
+  - **Run reliably on device**: Behave predictably on the ESP32 despite limited RAM, flaky network, and restarts.
 
 ## Product Objectives
 
@@ -50,10 +49,11 @@ We follow **SOLID principles** and **Clean Architecture** to keep the codebase m
 ### Clean Architecture Guidelines
 
 - **Core hexagon and layers**:
-  - The **core layer** contains the whole hexagon (domain + use cases) and must not depend on infrastructure or interface details.
+  - The **core layer** contains the whole hexagon (domain + application logic) and must not depend on infrastructure or interface details.
   - Inside `core/xxxx`, each `xxxx` directory represents a feature-oriented module.
   - `core/xxxx/gateways` contains all input/output ports of the hexagon (interfaces for driving and driven adapters).
-  - `core/xxxx/usecases` contains all use cases / application services for that feature.
+  - `core/xxxx/commands` contains all commands and application services for that feature (no `usecases` folder).
+  - We favor a **command / event** style, CQRS-inspired: write-side commands and read-side events, with clear separation of intent and outcome.
   - Outer layers (infrastructure, interfaces) implement the gateways and depend on the core, never the opposite.
 
 - **Dependency direction**:
@@ -63,6 +63,8 @@ We follow **SOLID principles** and **Clean Architecture** to keep the codebase m
 - **Testability**:
   - Domain and application logic should be testable without hardware (e.g., using pure Python and mocks).
   - Keep hardware-specific code confined to adapters with minimal logic.
+  - `core/` should contain tests that can be executed directly on the developer machine (macOS) without an ESP32 connected.
+  - The real hardware/network implementations are injected at the composition root only (typically `main.py`), never inside `core/`.
 
 - **Configuration over hard-coding**:
   - Public vs. private contact routing rules, endpoints, and credentials should be configurable (environment variables, config files, or build-time flags) instead of hard-coded.

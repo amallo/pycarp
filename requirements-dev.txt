@@ -1,0 +1,2 @@
+# Dev dependencies: run core tests on macOS (no ESP32)
+pytest>=7.0.0
