@@ -16,13 +16,13 @@ class TestInitDeviceCommand(unittest.TestCase):
         app_state.reset()
 
     def test_first_boot_device(self):
-        fake = FakeConfigGateway()
-        command = InitDeviceCommand(fake)
+        configGateway = FakeConfigGateway()
+        command = InitDeviceCommand(configGateway)
 
         result = command.execute()
         
 
-        self.assertEqual(fake.saved_device_id, DEFAULT_DEVICE_ID)
+        self.assertEqual(configGateway.saved_device_id, DEFAULT_DEVICE_ID)
         self.assertIsInstance(result, DeviceInitialized)
         self.assertEqual(result.device_id, DEFAULT_DEVICE_ID)
         app_state.apply(result)
@@ -31,15 +31,15 @@ class TestInitDeviceCommand(unittest.TestCase):
 
     def test_boot_already_configured_device(self):
         already_configured_id = "already-configured"
-        fake = FakeConfigGateway()
-        fake.saved_device_id = already_configured_id
-        command = InitDeviceCommand(fake)
+        configGateway = FakeConfigGateway()
+        configGateway.saved_device_id = already_configured_id
+        command = InitDeviceCommand(configGateway)
 
         result = command.execute()
 
         self.assertIsInstance(result, DeviceInitialized)
         self.assertEqual(result.device_id, already_configured_id)
-        self.assertEqual(fake.saved_device_id, already_configured_id)
+        self.assertEqual(configGateway.saved_device_id, already_configured_id)
         app_state.apply(result)
         self.assertEqual(app_state.device_state, INITIALIZED)
 
