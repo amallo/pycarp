@@ -15,7 +15,7 @@ class TestInitDeviceCommand(unittest.TestCase):
     def tearDown(self):
         app_state.reset()
 
-    def test_initialize_not_configured_device(self):
+    def test_first_boot_device(self):
         fake = FakeConfigGateway()
         command = InitDeviceCommand(fake)
 
@@ -27,6 +27,20 @@ class TestInitDeviceCommand(unittest.TestCase):
         self.assertEqual(result.device_id, DEFAULT_DEVICE_ID)
         app_state.apply(result)
 
+        self.assertEqual(app_state.device_state, INITIALIZED)
+
+    def test_boot_already_configured_device(self):
+        already_configured_id = "already-configured"
+        fake = FakeConfigGateway()
+        fake.saved_device_id = already_configured_id
+        command = InitDeviceCommand(fake)
+
+        result = command.execute()
+
+        self.assertIsInstance(result, DeviceInitialized)
+        self.assertEqual(result.device_id, already_configured_id)
+        self.assertEqual(fake.saved_device_id, already_configured_id)
+        app_state.apply(result)
         self.assertEqual(app_state.device_state, INITIALIZED)
 
 

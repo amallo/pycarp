@@ -17,6 +17,9 @@ class InitDeviceCommand:
         self._config = config_gateway
 
     def execute(self):
-        """Persist default device id and return a DeviceInitialized event."""
+        """Persist default device id and return a DeviceInitialized event (same state INITIALIZED for first boot or already configured)."""
+        existing_id = self._config.get_device_id()
+        if existing_id is not None:
+            return DeviceInitialized(device_id=existing_id)
         self._config.save_device_id(DEFAULT_DEVICE_ID)
         return DeviceInitialized(device_id=DEFAULT_DEVICE_ID)

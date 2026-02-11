@@ -12,5 +12,8 @@ class FakeConfigGateway(ConfigGateway):
     def __init__(self):
         self.saved_device_id = None
 
+    def get_device_id(self):
+        return self.saved_device_id
+
     def save_device_id(self, device_id):
         self.saved_device_id = device_id
