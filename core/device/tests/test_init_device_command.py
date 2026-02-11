@@ -15,22 +15,16 @@ class TestInitDeviceCommand(unittest.TestCase):
     def tearDown(self):
         app_state.reset()
 
-    def test_execute_persists_device_id_and_marks_initialized(self):
+    def test_initialize_not_configured_device(self):
         fake = FakeConfigGateway()
         command = InitDeviceCommand(fake)
 
         result = command.execute()
+        
 
         self.assertEqual(fake.saved_device_id, DEFAULT_DEVICE_ID)
-        self.assertTrue(fake.mark_initialized_called)
         self.assertIsInstance(result, DeviceInitialized)
         self.assertEqual(result.device_id, DEFAULT_DEVICE_ID)
-
-    def test_execute_updates_shared_state_when_event_applied(self):
-        fake = FakeConfigGateway()
-        command = InitDeviceCommand(fake)
-
-        result = command.execute()
         app_state.apply(result)
 
         self.assertEqual(app_state.device_state, INITIALIZED)

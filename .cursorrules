@@ -65,6 +65,7 @@ We follow **SOLID principles** and **Clean Architecture** to keep the codebase m
   - Keep hardware-specific code confined to adapters with minimal logic.
   - `core/` should contain tests that can be executed directly on the developer machine (macOS) without an ESP32 connected.
   - The real hardware/network implementations are injected at the composition root only (typically `main.py`), never inside `core/`.
+  - Tests should focus on describing expected behavior (**what**) rather than implementation details (**how**); prefer BDD-style naming and Given/When/Then structure when possible.
 
 - **Configuration over hard-coding**:
   - Public vs. private contact routing rules, endpoints, and credentials should be configurable (environment variables, config files, or build-time flags) instead of hard-coded.
