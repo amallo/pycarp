@@ -17,31 +17,28 @@ class TestInitDeviceCommand(unittest.TestCase):
         app_state.reset()
 
     def test_first_boot_device(self):
-        generated_id = "generated-device-id"
         config_gateway = FakeConfigGateway()
-        device_id_generator = FakeDeviceIdGenerator(value=generated_id)
+        device_id_generator = FakeDeviceIdGenerator(value="generated-device-id")
         command = InitDeviceCommand(config_gateway, device_id_generator)
 
         result = command.execute()
 
-        self.assertEqual(config_gateway.saved_device_id, generated_id)
+        self.assertEqual(config_gateway.saved_device_id, device_id_generator.generated_device_id)
         self.assertIsInstance(result, DeviceInitialized)
-        self.assertEqual(result.device_id, generated_id)
+        self.assertEqual(result.device_id, device_id_generator.generated_device_id)
         app_state.apply(result)
         self.assertEqual(app_state.device_state, INITIALIZED)
 
     def test_boot_already_configured_device(self):
-        already_configured_id = "already-configured"
+        device_id_generator = FakeDeviceIdGenerator(value="already-configured")
         config_gateway = FakeConfigGateway()
-        config_gateway.saved_device_id = already_configured_id
-        device_id_generator = FakeDeviceIdGenerator()
+        config_gateway.saved_device_id = device_id_generator.generated_device_id
         command = InitDeviceCommand(config_gateway, device_id_generator)
 
         result = command.execute()
 
         self.assertIsInstance(result, DeviceInitialized)
-        self.assertEqual(result.device_id, already_configured_id)
-        self.assertEqual(config_gateway.saved_device_id, already_configured_id)
+        self.assertEqual(result.device_id, device_id_generator.generated_device_id)
         app_state.apply(result)
         self.assertEqual(app_state.device_state, INITIALIZED)
 

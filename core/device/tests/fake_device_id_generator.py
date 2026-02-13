@@ -10,7 +10,7 @@ class FakeDeviceIdGenerator(DeviceIdGenerator):
     """Test double that returns a configurable fixed device id."""
 
     def __init__(self, value="generated-device-id"):
-        self.value = value
+        self.generated_device_id = value
 
     def generate(self):
-        return self.value
+        return self.generated_device_id
