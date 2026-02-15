@@ -4,7 +4,7 @@ Tests for InitDeviceCommandHandler. Uses FakeConfigGateway, FakeDeviceIdGenerato
 
 import unittest
 
-from core.gateways.infra import FakeEventPublisher
+from core.gateways.infra import FakeCommandBus, FakeEventPublisher
 from core.device.gateways.infra import FakeConfigGateway, FakeDeviceIdGenerator
 from core.device.commands import InitDeviceOrder, InitDeviceCommandHandler
 from core.device.events import DeviceInitialized
@@ -17,7 +17,9 @@ class InitDeviceCommandHandlerTest(unittest.TestCase):
         device_id_generator = FakeDeviceIdGenerator("ignored")
         event_publisher = FakeEventPublisher()
         handler = InitDeviceCommandHandler(config_gateway, device_id_generator, event_publisher)
-        handler.handle(InitDeviceOrder())
+        command_bus = FakeCommandBus()
+        command_bus.register(InitDeviceOrder, handler)
+        command_bus.dispatch(InitDeviceOrder())
         self.assertEqual(len(event_publisher.published_events), 1)
         self.assertIsInstance(event_publisher.published_events[0], DeviceInitialized)
         self.assertEqual(event_publisher.published_events[0].device_id, existing_id)
@@ -28,7 +30,9 @@ class InitDeviceCommandHandlerTest(unittest.TestCase):
         device_id_generator = FakeDeviceIdGenerator(generated_device_id=device_id)
         event_publisher = FakeEventPublisher()
         handler = InitDeviceCommandHandler(config_gateway, device_id_generator, event_publisher)
-        handler.handle(InitDeviceOrder())
+        command_bus = FakeCommandBus()
+        command_bus.register(InitDeviceOrder, handler)
+        command_bus.dispatch(InitDeviceOrder())
         self.assertEqual(config_gateway.get_device_id(), device_id)
         self.assertEqual(len(event_publisher.published_events), 1)
         self.assertIsInstance(event_publisher.published_events[0], DeviceInitialized)

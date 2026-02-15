@@ -91,3 +91,26 @@ We follow **SOLID principles** and **Clean Architecture** to keep the codebase m
   - Document public interfaces and key architectural decisions in English.
   - When adding new modules, briefly describe their responsibility and their place in the architecture.
 
+## Commit Messages (Conventional Commits)
+
+- **Format**: `<type>[optional scope]: <description>`.
+  - Example: `feat(device): add InitDevice command and handler`.
+  - Use imperative mood in the subject: "add" not "added", "fix" not "fixed".
+  - No period at the end of the subject. Keep the subject line under ~72 characters.
+
+- **Types** (required):
+  - `feat`: New feature or capability.
+  - `fix`: Bug fix.
+  - `docs`: Documentation only (README, comments, .cursorrules).
+  - `style`: Formatting, whitespace, no code change (e.g. PEP 8).
+  - `refactor`: Code change that neither fixes a bug nor adds a feature.
+  - `perf`: Performance improvement.
+  - `test`: Adding or updating tests.
+  - `build` / `ci` / `chore`: Build, CI, or tooling (Makefile, config, deps).
+
+- **Scope** (optional): Module or area, e.g. `device`, `gateways`, `core`.
+
+- **Body** (optional): Explain what and why, not how. Wrap at 72 characters.
+
+- **Footer** (optional): `BREAKING CHANGE:` or issue refs, e.g. `Refs #123`.
+
