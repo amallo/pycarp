@@ -51,7 +51,8 @@ We follow **SOLID principles** and **Clean Architecture** to keep the codebase m
 - **Core hexagon and layers**:
   - The **core layer** contains the whole hexagon (domain + application logic) and must not depend on infrastructure or interface details.
   - Inside `core/xxxx`, each `xxxx` directory represents a feature-oriented module.
-  - `core/xxxx/gateways` contains all input/output ports of the hexagon (interfaces for driving and driven adapters).
+  - `core/xxxx/gateways` contains **only** the ports (interfaces); no concrete implementations.
+  - `core/xxxx/gateways/infra` contains all implementations of those gateways (fakes for tests, NVS/ESP32 adapters for production, etc.).
   - `core/xxxx/commands` contains all commands and application services for that feature (no `usecases` folder).
   - We favor a **command / event** style, CQRS-inspired: write-side commands and read-side events, with clear separation of intent and outcome.
   - Outer layers (infrastructure, interfaces) implement the gateways and depend on the core, never the opposite.
