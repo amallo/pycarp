@@ -1,42 +1,46 @@
 """
-Tests for InitDeviceCommandHandler. Uses FakeConfigGateway, FakeDeviceIdGenerator, FakeEventPublisher; no ESP32 required.
+Tests for InitDeviceCommandHandler. BDD style (Given/When/Then). No ESP32 required.
 """
 
 import unittest
 
-from core.gateways.infra import FakeCommandBus, FakeEventPublisher
+from core.gateways.infra import FakeEventPublisher
 from core.device.gateways.infra import FakeConfigGateway, FakeDeviceIdGenerator
-from core.device.commands import InitDeviceOrder, InitDeviceCommandHandler
-from core.device.events import DeviceInitialized
+from core.device.commands import InitDeviceOrder
+from core.device.tests.helpers import (
+    TestDependencies,
+    build_init_device_command_bus,
+    assert_one_device_initialized,
+)
 
 
 class InitDeviceCommandHandlerTest(unittest.TestCase):
-    def test_handle_when_device_id_exists_publishes_device_initialized_with_existing_id(self):
-        existing_id = "existing-id"
-        config_gateway = FakeConfigGateway(device_id=existing_id)
-        device_id_generator = FakeDeviceIdGenerator("ignored")
-        event_publisher = FakeEventPublisher()
-        handler = InitDeviceCommandHandler(config_gateway, device_id_generator, event_publisher)
-        command_bus = FakeCommandBus()
-        command_bus.register(InitDeviceOrder, handler)
+    def test_given_existing_device_id_when_init_device_then_publishes_with_that_id(self):
+        # Given: dependencies with existing device id
+        deps = TestDependencies(
+            config_gateway=FakeConfigGateway(device_id="existing-id"),
+            device_id_generator=FakeDeviceIdGenerator("ignored"),
+            event_publisher=FakeEventPublisher(),
+        )
+        command_bus = build_init_device_command_bus(deps)
+        # When
         command_bus.dispatch(InitDeviceOrder())
-        self.assertEqual(len(event_publisher.published_events), 1)
-        self.assertIsInstance(event_publisher.published_events[0], DeviceInitialized)
-        self.assertEqual(event_publisher.published_events[0].device_id, existing_id)
+        # Then
+        assert_one_device_initialized(self, deps.event_publisher, "existing-id")
 
-    def test_handle_when_no_device_id_generates_saves_and_publishes_device_initialized(self):
-        device_id = "new-generated-id"
-        config_gateway = FakeConfigGateway(device_id=None)
-        device_id_generator = FakeDeviceIdGenerator(generated_device_id=device_id)
-        event_publisher = FakeEventPublisher()
-        handler = InitDeviceCommandHandler(config_gateway, device_id_generator, event_publisher)
-        command_bus = FakeCommandBus()
-        command_bus.register(InitDeviceOrder, handler)
+    def test_given_no_device_id_when_init_device_then_generates_saves_and_publishes(self):
+        # Given: no device id; generator returns "new-generated-id"
+        deps = TestDependencies(
+            config_gateway=FakeConfigGateway(device_id=None),
+            device_id_generator=FakeDeviceIdGenerator(generated_device_id="new-generated-id"),
+            event_publisher=FakeEventPublisher(),
+        )
+        command_bus = build_init_device_command_bus(deps)
+        # When
         command_bus.dispatch(InitDeviceOrder())
-        self.assertEqual(config_gateway.get_device_id(), device_id)
-        self.assertEqual(len(event_publisher.published_events), 1)
-        self.assertIsInstance(event_publisher.published_events[0], DeviceInitialized)
-        self.assertEqual(event_publisher.published_events[0].device_id, device_id_generator.generated_device_id)
+        # Then
+        self.assertEqual(deps.config_gateway.get_device_id(), "new-generated-id")
+        assert_one_device_initialized(self, deps.event_publisher, "new-generated-id")
 
 
 if __name__ == "__main__":
