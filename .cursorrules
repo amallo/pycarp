@@ -92,6 +92,9 @@ We follow **SOLID principles** and **Clean Architecture** to keep the codebase m
   - Document public interfaces and key architectural decisions in English.
   - When adding new modules, briefly describe their responsibility and their place in the architecture.
 
+- **Plans**:
+  - Any plan (e.g. feature, refactor, new module) must include **concrete code examples** (signatures, class bodies, or usage snippets) so the implementation is unambiguous.
+
 ## Commit Messages (Conventional Commits)
 
 - **Format**: `<type>[optional scope]: <description>`.
